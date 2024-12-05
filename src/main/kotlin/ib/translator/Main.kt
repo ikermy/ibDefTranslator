@@ -16,22 +16,25 @@ val traductor = Traductor()
 val sql = TransR2SQL()
 
 suspend fun translateAuthor(): Unit = coroutineScope {
-
-    sql.translateAuthor(traductor,
-        complete = {
-            Traductor.Log.info { "Translation authors completed. Waiting new articles from kafka" }
-            launch(Dispatchers.IO) {
-                listenToKafka()
-            }
-                   },
-        success = {
-            println("Translation success")
-            launch(Dispatchers.IO) {
-                translateAuthor()
-            }
-                  },
-        error = { Traductor.Log.error { "Translation error: ${it.message}" } }
-    )
+    try {
+        sql.translateAuthor(traductor,
+            complete = {
+                Traductor.Log.info { "Translation authors completed. Waiting new articles from kafka" }
+                launch(Dispatchers.IO) {
+                    listenToKafka()
+                }
+            },
+            success = {
+                println("Translation success")
+                launch(Dispatchers.IO) {
+                    translateAuthor()
+                }
+            },
+            error = { Traductor.Log.error { "Translation error: ${it.message}" } }
+        )
+    } catch (e: Exception) {
+        Traductor.Log.error { "Error translateAuthor: ${e.message}" }
+    }
 }
 
 suspend fun listenToKafka(): Unit = coroutineScope {
@@ -40,6 +43,7 @@ suspend fun listenToKafka(): Unit = coroutineScope {
         put(ConsumerConfig.GROUP_ID_CONFIG, "translation-group")
         put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java.name)
         put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java.name)
+        put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest") // или "latest"
     }
 
     val consumer = KafkaConsumer<String, String>(consumerProps)

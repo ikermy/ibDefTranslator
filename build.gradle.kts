@@ -31,15 +31,6 @@ tasks.register("incrementVersion") {
     }
 }
 
-tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
-    minimize() // Используйте метод minimize для минификации кода proguard { configuration("proguard-rules.pro")
-    archiveClassifier.set("all")
-    manifest {
-        attributes["Main-Class"] = "ib.translator.MainKt"
-    }
-    finalizedBy("incrementVersion")
-}
-
 repositories {
     mavenCentral()
 }
@@ -47,13 +38,13 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     implementation(files("D:/IntelliJProject/ibAssembly/build/classes/kotlin/main"))
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-        //R2SQL
-        implementation("io.r2dbc:r2dbc-spi:0.8.6.RELEASE")
-        implementation("org.mariadb:r2dbc-mariadb:1.3.0")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.5.2")
-        // Для работы с конфигурацией
-        implementation("com.typesafe:config:1.4.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    //R2SQL
+    implementation("io.r2dbc:r2dbc-spi:0.8.6.RELEASE")
+    implementation("org.mariadb:r2dbc-mariadb:1.3.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.5.2")
+    // Для работы с конфигурацией
+    implementation("com.typesafe:config:1.4.2")
     // Logging
     implementation("org.slf4j:slf4j-api:2.0.16")
     implementation("ch.qos.logback:logback-classic:1.5.12")
