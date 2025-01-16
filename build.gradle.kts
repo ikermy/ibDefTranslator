@@ -24,10 +24,43 @@ fun incrementVersion() {
 }
 
 version = getVersion()
-
+// Настройка задачи test
+tasks.test {
+    useJUnitPlatform()
+}
+// Настройка задачи shadowJar
+tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+    dependsOn("test") // Задача shadowJar зависит от задачи test
+    finalizedBy("incrementVersion")
+    finalizedBy("runCmdScript")
+}
 tasks.register("incrementVersion") {
     doLast {
         incrementVersion()
+    }
+}
+val jarName = tasks.register("getJarName") {
+    dependsOn("shadowJar")
+    doLast {
+        val shadowJarTask = tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar").get()
+        val jarFile = shadowJarTask.archiveFile.get().asFile
+        println("File name: ${jarFile.name}")
+        project.extra["jarFileName"] = jarFile.name
+    }
+}
+val jarFileTask = tasks.register("jarFile") {
+    val shadowJarTask = tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar").get()
+    val jarFile = shadowJarTask.archiveFile.get().asFile
+    project.extra["jarFile"] = jarFile
+}
+tasks.register("runCmdScript") {
+    dependsOn("jarFile")
+    doLast {
+        val jarFile = project.extra["jarFile"] as File
+        println("File name: ${jarFile.name}")
+        exec {
+            commandLine("cmd", "/c", "D:/IntelliJProject/ModuleCI/ModuleCI/build/libs/CI-SCRYPT.bat ${project.projectDir}/build/libs/${jarFile.name} ${project.projectDir}")
+        }
     }
 }
 
@@ -50,10 +83,6 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.5.12")
     // Kafka
     implementation("org.apache.kafka:kafka-clients:3.9.0")
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 application { mainClass.set("ib.translator.MainKt") }
