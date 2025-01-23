@@ -39,28 +39,24 @@ tasks.register("incrementVersion") {
         incrementVersion()
     }
 }
-val jarName = tasks.register("getJarName") {
+val jarFileTask = tasks.register("jarFile") {
     dependsOn("shadowJar")
     doLast {
         val shadowJarTask = tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar").get()
         val jarFile = shadowJarTask.archiveFile.get().asFile
         println("File name: ${jarFile.name}")
+        project.extra["jarFile"] = jarFile
         project.extra["jarFileName"] = jarFile.name
     }
-}
-val jarFileTask = tasks.register("jarFile") {
-    val shadowJarTask = tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar").get()
-    val jarFile = shadowJarTask.archiveFile.get().asFile
-    project.extra["jarFile"] = jarFile
 }
 tasks.register("runCmdScript") {
     dependsOn("jarFile")
     doLast {
         val jarFile = project.extra["jarFile"] as File
         println("File name: ${jarFile.name}")
-        exec {
-            commandLine("cmd", "/c", "D:/IntelliJProject/ModuleCI/ModuleCI/build/libs/CI-SCRYPT.bat ${project.projectDir}/build/libs/${jarFile.name} ${project.projectDir}")
-        }
+//        exec {
+//            commandLine("cmd", "/c", "D:/IntelliJProject/ModuleCI/ModuleCI/build/libs/CI-SCRYPT.bat ${project.projectDir}/build/libs/${jarFile.name} ${project.projectDir}")
+//        }
     }
 }
 
