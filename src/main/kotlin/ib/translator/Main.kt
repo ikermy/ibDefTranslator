@@ -2,6 +2,7 @@ package ib.translator
 
 import ib.assembly.traductor.Traductor
 import ib.translator.r2sql.TransR2SQL
+import ib.translator.translator.Translator
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
@@ -16,8 +17,8 @@ import java.util.*
 import java.time.Duration
 
 
-val traductor = Traductor()
-val sql = TransR2SQL()
+//val traductor = Traductor()
+//val sql = TransR2SQL()
 val semaphore = Semaphore(1)
 
 fun kafkaMessagesFlow(): Flow<ConsumerRecord<String, String>> = flow {
@@ -57,35 +58,52 @@ suspend fun listenToKafkaWithFlow() = coroutineScope {
 
 
 suspend fun translate () =  coroutineScope {
+    val trans = Translator()
     var flag = true
     while (flag) {
-        sql.translateAuthor(traductor,
-            complete = {
-                Traductor.Log.info { "Translation authors completed. Waiting new articles from kafka" }
+        // Перевод авторов
+        trans.translateAuthor(
+            error = {
+                Traductor.Log.error { "Translation authors error: ${it.message}" }
                 flag = false
             },
             success = {
                 println("Translation success")
             },
-            error = { Traductor.Log.error { "Translation authors error: ${it.message}" } }
+            complete = {
+                Traductor.Log.info { "Translation authors completed. Waiting new articles from kafka" }
+                flag = false
+            }
         )
+        delay(1000)
+//        sql.translateAuthor(traductor,
+//            complete = {
+//                Traductor.Log.info { "Translation authors completed. Waiting new articles from kafka" }
+//                flag = false
+//            },
+//            success = {
+//                println("Translation success")
+//            },
+//            error = { Traductor.Log.error { "Translation authors error: ${it.message}" } }
+//        )
     }
     // Перевод тегов
     flag = true
     while (flag) {
-        sql.translateTag(traductor,
-            complete = {
-                Traductor.Log.info { "Translation tags completed. Waiting new articles from kafka" }
-                flag = false
-            },
-            success = {
-                println("Translation tag success")
-            },
+        trans.translateTag(
             error = {
                 Traductor.Log.error { "Translation tags error: ${it.message}" }
                 flag = false
+            },
+            success = {
+                println("Translation success")
+            },
+            complete = {
+                Traductor.Log.info { "Translation tags completed. Waiting new articles from kafka" }
+                flag = false
             }
         )
+        delay(1000)
     }
 }
 

@@ -54,9 +54,9 @@ tasks.register("runCmdScript") {
     doLast {
         val jarFile = project.extra["jarFile"] as File
         println("File name: ${jarFile.name}")
-//        exec {
-//            commandLine("cmd", "/c", "D:/IntelliJProject/ModuleCI/ModuleCI/build/libs/CI-SCRYPT.bat ${project.projectDir}/build/libs/${jarFile.name} ${project.projectDir}")
-//        }
+        exec {
+            commandLine("cmd", "/c", "D:/IntelliJProject/ModuleCI/build/libs/CI-SCRYPT.bat ${project.projectDir}/build/libs/${jarFile.name} ${project.projectDir}")
+        }
     }
 }
 
@@ -79,6 +79,8 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.5.12")
     // Kafka
     implementation("org.apache.kafka:kafka-clients:3.9.0")
+    // JSON
+    implementation("org.json:json:20210307")
 }
 
 application { mainClass.set("ib.translator.MainKt") }
