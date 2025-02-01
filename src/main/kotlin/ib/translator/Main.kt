@@ -1,7 +1,6 @@
 package ib.translator
 
 import ib.assembly.traductor.Traductor
-import ib.translator.r2sql.TransR2SQL
 import ib.translator.translator.Translator
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
@@ -17,8 +16,6 @@ import java.util.*
 import java.time.Duration
 
 
-//val traductor = Traductor()
-//val sql = TransR2SQL()
 val semaphore = Semaphore(1)
 
 fun kafkaMessagesFlow(): Flow<ConsumerRecord<String, String>> = flow {
